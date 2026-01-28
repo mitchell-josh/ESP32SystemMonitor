@@ -11,7 +11,7 @@ public class WindowsHardwareProvider : IHardwareProvider
 
     private readonly WindowsHardwareVisitor _visitor;
 
-    public WindowsHardwareProvider(Computer? computer)
+    public WindowsHardwareProvider(Computer? computer = null)
     {
         this._computer = computer ?? new Computer
         {
@@ -31,60 +31,50 @@ public class WindowsHardwareProvider : IHardwareProvider
         this._computer.Accept(this._visitor);
     }
 
-    public double? GetCpuUsage()
+    public decimal? GetCpuUsage()
     {
         this.Refresh();
-        return this._computer.Hardware
+        return (decimal?)this._computer.Hardware
             ?.FirstOrDefault(h => h.HardwareType == HardwareType.Cpu)
             ?.Sensors
             ?.FirstOrDefault(s => s.SensorType == SensorType.Load && s.Name == "CPU Total")
             ?.Value;
     }
 
-    public double? GetCpuClockSpeed()
+    public decimal? GetCpuClockSpeed()
     {
         this.Refresh();
-        return this._computer.Hardware
+        return (decimal?)this._computer.Hardware
             ?.FirstOrDefault(h => h.HardwareType == HardwareType.Cpu)
             ?.Sensors
-            ?.Where(s => s.SensorType == SensorType.Clock)
-            ?.Average(s => s.Value);
+            ?.Where(s => s.SensorType == SensorType.Clock && s.Name.Contains("Cores (Average)"))
+            ?.Max(s => s.Value);
     }
 
-    public double? GetCpuTemperature()
+    public decimal? GetCpuTemperature()
     {
         this.Refresh();
-        return this._computer.Hardware
+        return (decimal?)this._computer.Hardware
             ?.FirstOrDefault(h => h.HardwareType == HardwareType.Cpu)
             ?.Sensors
-            ?.FirstOrDefault(s => s.SensorType == SensorType.Temperature && s.Name == "CPU Package")
+            ?.FirstOrDefault(s => s.SensorType == SensorType.Temperature && s.Name == "Core (Tctl/Tdie)")
             ?.Value;
     }
 
-    public double? GetUsedMemory()
+    public decimal? GetUsedMemory()
     {
         this.Refresh();
-        return this._computer.Hardware
-            ?.FirstOrDefault(h => h.HardwareType == HardwareType.Memory)
+        return (decimal?)this._computer.Hardware
+            ?.FirstOrDefault(h => h.HardwareType == HardwareType.Memory && h.Name == "Total Memory")
             ?.Sensors
             ?.FirstOrDefault(s => s.SensorType == SensorType.Data && s.Name == "Memory Used")
             ?.Value;
     }
 
-    public double? GetTotalMemory()
+    public decimal? GetGpuUsage()
     {
         this.Refresh();
-        return this._computer.Hardware
-            ?.FirstOrDefault(h => h.HardwareType == HardwareType.Memory)
-            ?.Sensors
-            ?.FirstOrDefault(s => s.SensorType == SensorType.Data && s.Name == "Memory Available")
-            ?.Value;    
-    }
-
-    public double? GetGpuUsage()
-    {
-        this.Refresh();
-        return this._computer.Hardware
+        return (decimal?)this._computer.Hardware
             ?.FirstOrDefault(h => (h.HardwareType == HardwareType.GpuAmd
                                         || h.HardwareType == HardwareType.GpuNvidia
                                         || h.HardwareType == HardwareType.GpuIntel))
@@ -93,10 +83,10 @@ public class WindowsHardwareProvider : IHardwareProvider
             ?.Value;        
     }
 
-    public double? GetGpuTemperature()
+    public decimal? GetGpuTemperature()
     {
         this.Refresh();
-        return this._computer.Hardware
+        return (decimal?)this._computer.Hardware
             ?.FirstOrDefault(h => (h.HardwareType == HardwareType.GpuAmd
                                    || h.HardwareType == HardwareType.GpuNvidia
                                    || h.HardwareType == HardwareType.GpuIntel))
@@ -105,10 +95,10 @@ public class WindowsHardwareProvider : IHardwareProvider
             ?.Value;       
     }
 
-    public double? GetGpuClockSpeed()
+    public decimal? GetGpuClockSpeed()
     {
         this.Refresh();
-        return this._computer.Hardware
+        return (decimal?)this._computer.Hardware
             ?.FirstOrDefault(h => (h.HardwareType == HardwareType.GpuAmd
                                    || h.HardwareType == HardwareType.GpuNvidia
                                    || h.HardwareType == HardwareType.GpuIntel))
@@ -117,23 +107,23 @@ public class WindowsHardwareProvider : IHardwareProvider
             ?.Value;   
     }
 
-    public double? GetNetworkSent()
+    public decimal? GetNetworkSent()
     {
         this.Refresh();
-        return this._computer.Hardware
-            ?.FirstOrDefault(h =>  h.HardwareType == HardwareType.Network)
-            ?.Sensors
-            ?.FirstOrDefault(s => s.SensorType == SensorType.Throughput && s.Name.Contains("Upload"))
-            ?.Value;       
+        return (decimal?)this._computer.Hardware
+            ?.Where(h => h.HardwareType == HardwareType.Network)
+            ?.SelectMany(h => h.Sensors)
+            ?.Where(s => s.SensorType == SensorType.Throughput && s.Name == "Upload Speed")
+            ?.Max(s => s.Value);
     }
 
-    public double? GetNetworkReceived()
+    public decimal? GetNetworkReceived()
     {
         this.Refresh();
-        return this._computer.Hardware
-            ?.FirstOrDefault(h =>  h.HardwareType == HardwareType.Network)
-            ?.Sensors
-            ?.FirstOrDefault(s => s.SensorType == SensorType.Throughput && s.Name.Contains("Download"))
-            ?.Value;      
+        return (decimal?)this._computer.Hardware
+            ?.Where(h => h.HardwareType == HardwareType.Network)
+            ?.SelectMany(h => h.Sensors)
+            ?.Where(s => s.SensorType == SensorType.Throughput && s.Name == "Download Speed")
+            ?.Max(s => s.Value);     
     }
 }

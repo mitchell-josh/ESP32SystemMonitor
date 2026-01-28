@@ -2,9 +2,9 @@ namespace SysMonService.Interfaces;
 
 public interface IGraphics : IHardware
 {
-    double? UsagePercentage { get; set; }
+    decimal? UsagePercentage { get; set; }
     
-    double? ClockSpeed { get; set; }
+    decimal? ClockSpeed { get; set; }
     
-    double? Temperature { get; set; }
+    decimal? Temperature { get; set; }
 }

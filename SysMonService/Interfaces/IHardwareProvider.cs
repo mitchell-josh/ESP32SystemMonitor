@@ -2,23 +2,21 @@ namespace SysMonService.Interfaces;
 
 public interface IHardwareProvider
 {
-    double? GetCpuUsage();
+    decimal? GetCpuUsage();
     
-    double? GetCpuClockSpeed();
+    decimal? GetCpuClockSpeed();
 
-    double? GetCpuTemperature();
+    decimal? GetCpuTemperature();
 
-    double? GetUsedMemory();
-
-    double? GetTotalMemory();
-
-    double? GetGpuUsage();
+    decimal? GetUsedMemory();
     
-    double? GetGpuClockSpeed();
-
-    double? GetGpuTemperature();
-
-    double? GetNetworkSent();
+    decimal? GetGpuUsage();
     
-    double? GetNetworkReceived();
+    decimal? GetGpuClockSpeed();
+
+    decimal? GetGpuTemperature();
+
+    decimal? GetNetworkSent();
+    
+    decimal? GetNetworkReceived();
 }

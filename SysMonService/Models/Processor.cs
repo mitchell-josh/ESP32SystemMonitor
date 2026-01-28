@@ -1,20 +1,21 @@
 using Hardware.Info;
 using SysMonService.Interfaces;
+using SysMonService.Utils;
 
 namespace SysMonService.Models;
 
 public class Processor(IHardwareProvider hardwareProvider) : SimpleSerialiser<Processor>, IProcessor
 {
-    public double? UsagePercentage { get; set; }
+    public decimal? UsagePercentage { get; set; }
     
-    public double? ClockSpeed { get; set; }
+    public decimal? ClockSpeed { get; set; }
     
-    public double? Temperature { get; set; }
+    public decimal? Temperature { get; set; }
 
     public void Refresh()
     {
-        this.UsagePercentage = hardwareProvider.GetCpuUsage();
-        this.ClockSpeed = hardwareProvider.GetCpuClockSpeed();
-        this.Temperature = hardwareProvider.GetCpuTemperature();
+        this.UsagePercentage = hardwareProvider.GetCpuUsage().Round2();
+        this.ClockSpeed = hardwareProvider.GetCpuClockSpeed().MhzToGhz().Round2();
+        this.Temperature = hardwareProvider.GetCpuTemperature().Round2();
     }
 }

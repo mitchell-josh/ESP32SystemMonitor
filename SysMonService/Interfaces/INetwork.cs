@@ -2,7 +2,7 @@ namespace SysMonService.Interfaces;
 
 public interface INetwork : IHardware
 {
-    double? Sent { get; set; }
+    decimal? Sent { get; set; }
     
-    double? Received { get; set; }
+    decimal? Received { get; set; }
 }

@@ -5,7 +5,7 @@ namespace SysMonService.Models;
 
 public class SimpleSerialiser<T> : ISerialisable<T>
 {
-    public string Serialise() => JsonSerializer.Serialize(this);
+    public string Serialise() => JsonSerializer.Serialize(this, this.GetType());
 
     public T? Deserialise() => JsonSerializer.Deserialize<T>(Serialise());
 }

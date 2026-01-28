@@ -1,4 +1,5 @@
 using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 using SysMonService.Interfaces;
 using SysMonService.Utils;
 
@@ -6,6 +7,7 @@ namespace SysMonService.Models;
 
 public class System(IHardwareProvider hardwareProvider, Settings settings) : SimpleSerialiser<System>
 {
+    [JsonIgnore]
     public Settings Settings => settings;
     
     public Processor? Processor { get; set; } = new Processor(hardwareProvider);

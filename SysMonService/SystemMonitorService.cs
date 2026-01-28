@@ -8,23 +8,36 @@ public class SystemMonitorService(Models.System system) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        using var serialPort = new SerialPort(system.Settings.ComPort, 9600, Parity.None, 8, StopBits.One);
+        SerialPort serialPort = null!;
         
-        serialPort.DataReceived += (sender, e) =>
+        while (!stoppingToken.IsCancellationRequested)
         {
-            SerialPort sp = (SerialPort)sender;
-            string indata = sp.ReadExisting();
-            global::System.Diagnostics.Debug.WriteLine($"[ESP32 DEBUG]: {indata}");
-        };
+            try
+            {
+                if (!(serialPort?.IsOpen ?? false))
+                {
+                    serialPort?.Dispose();
 
-        serialPort.DtrEnable = true;
-        serialPort.RtsEnable = true;
-        serialPort.Open();
-        
-        await AsyncUtils.StartAsync(() =>
-        {
-            byte[] data = System.Text.Encoding.ASCII.GetBytes(system.RefreshAndSerialise().Trim() + "\r\n");
-            serialPort.BaseStream.Write(data, 0, data.Length);
-        }, stoppingToken, 2000);
+                    serialPort = SerialUtils.GetOpenSerialPort(
+                        system.Settings.ComPort!,
+                        9600,
+                        Parity.None,
+                        8,
+                        StopBits.One);
+                }
+
+                if (serialPort?.IsOpen ?? false)
+                {
+                    var data = System.Text.Encoding.ASCII.GetBytes(system.RefreshAndSerialise().Trim() + "\r\n");
+                    await serialPort.BaseStream.WriteAsync(data, stoppingToken);
+                }
+            }
+            catch (Exception ex)
+            {
+                serialPort?.Close();
+            }
+            
+            await Task.Delay((int)system.Settings.PollingRate!, stoppingToken);
+        }
     }
 }

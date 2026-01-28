@@ -29,6 +29,7 @@ public class SystemMonitorService(Models.Machine machine) : BackgroundService
                 if (!(serialPort?.IsOpen ?? false))
                 {
                     serialPort?.Dispose();
+                    serialPort = null; // tidy up object
 
                     // Blocking call that waits for hardware to become available.
                     serialPort = SerialUtils.GetOpenSerialPort(
@@ -38,13 +39,14 @@ public class SystemMonitorService(Models.Machine machine) : BackgroundService
                         8,
                         StopBits.One);
                 }
-
                 
                 // Attempt to serialise and send data to microcontroller if connection is open.
                 if (serialPort?.IsOpen ?? false)
                 {
                     // Update all sensor data and convert to ASCII bytes.
                     var data = System.Text.Encoding.ASCII.GetBytes(machine.RefreshAndSerialise().Trim() + "\r\n");
+                    
+                    serialPort.WriteTimeout = 500;
                     await serialPort.BaseStream.WriteAsync(data, stoppingToken);
                 }
             }
@@ -54,6 +56,11 @@ public class SystemMonitorService(Models.Machine machine) : BackgroundService
                 
                 // Force-close port for next loop iteration.
                 serialPort?.Close();
+                serialPort?.Dispose();
+                serialPort = null;
+                
+                // Short delay before attempting reconnection
+                await Task.Delay(5000, stoppingToken);
             }
             
             // Wait for duration defined in settings before next update.

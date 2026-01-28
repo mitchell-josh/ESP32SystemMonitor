@@ -1,4 +1,3 @@
-using Hardware.Info;
 using SysMonService.Interfaces;
 using SysMonService.Utils;
 

@@ -7,11 +7,6 @@ using SysMonService.Utils;
 
 var builder = Host.CreateApplicationBuilder(args);
 
-// Run this and look at your Debug/Console window
-string[] ports = SerialPort.GetPortNames();
-Console.WriteLine("--- AVAILABLE PORTS ---");
-foreach (string p in ports) Console.WriteLine(p);
-
 builder.Services.AddSingleton<IHardwareProvider, WindowsHardwareProvider>();
 
 builder.Services.AddSingleton<Settings>();

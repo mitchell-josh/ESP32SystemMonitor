@@ -6,6 +6,9 @@ using ISettings = SysMonService.Interfaces.ISettings;
 
 var builder = Host.CreateApplicationBuilder(args);
 
+// Add windows service
+builder.Services.AddWindowsService(o => o.ServiceName = "SysMonService");
+
 // Register the hardware provider as a singleton.
 // Ensures only a single instance of LibreHardwareMonitor is running.
 builder.Services.AddSingleton<IHardwareProvider, WindowsHardwareProvider>();

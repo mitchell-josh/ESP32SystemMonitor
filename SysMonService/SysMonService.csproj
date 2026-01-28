@@ -9,7 +9,8 @@
 
     <ItemGroup>
         <PackageReference Include="LibreHardwareMonitorLib" Version="0.9.5" />
-        <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.11"/>
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.11" />
+        <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="9.0.0" />
     </ItemGroup>
 
     <ItemGroup>

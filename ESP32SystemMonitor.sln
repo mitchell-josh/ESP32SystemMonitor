@@ -2,6 +2,11 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SysMonService", "SysMonService\SysMonService.csproj", "{3977382B-5413-4E18-8312-635F7F5E6774}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionItems", "{A669ED52-03A9-461B-B2BF-0B32430785F6}"
+	ProjectSection(SolutionItems) = preProject
+		.gitea\workflows\build.yaml = .gitea\workflows\build.yaml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

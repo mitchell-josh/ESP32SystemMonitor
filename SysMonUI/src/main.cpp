@@ -17,10 +17,20 @@ static const uint32_t screenHeight = 240;
 static lv_disp_draw_buf_t draw_buf;
 static lv_color_t buf[screenWidth * 10];
 
-String inputString = "";
+/* Network monitor variables */
+float sentData = 0;
+float receivedData = 0;
+float currentMax = 10;
 
+/* Function prototypes */
 void update_processor(JsonDocument doc);
+void update_graphics(JsonDocument doc);
+void update_memory(JsonDocument doc);
+void update_network(JsonDocument doc);
 void update_network_charts(float new_sent, float new_received);
+void update_ui(const char * jsonString);
+void handle_serial_input();
+void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p);
 
 void update_processor(JsonDocument doc) {
     JsonObject processor = doc["Processor"];
@@ -30,10 +40,7 @@ void update_processor(JsonDocument doc) {
             char buf[16];
             snprintf(buf, sizeof(buf), "%.2f %%", usagePercentage);
             lv_label_set_text(ui_LblProcessorPct, buf);
-        } else {
-            Serial.println("Key 'UsagePercentage' MISSING from processor object!");
         }
-
         if (processor.containsKey("ClockSpeed")) {
             float clockSpeed = processor["ClockSpeed"];
             char buf[16];
@@ -85,14 +92,6 @@ void update_memory(JsonDocument doc) {
     }
 }
 
-float sentData = 0;
-float receivedData = 0;
-
-float sent_data[10] = {0};
-float received_data[10] = {0};
-int data_index = 0;
-float currentMax = 10;
-
 void update_network(JsonDocument doc) {
     JsonObject network = doc["Network"];
     if (!network.isNull()) {
@@ -110,10 +109,6 @@ void update_network(JsonDocument doc) {
 }
 
 void update_network_charts(float new_sent, float new_received) {
-    sent_data[data_index] = new_sent;
-    received_data[data_index] = new_received;
-    data_index = (data_index + 1) % 10;
-
     if (new_received > currentMax * 0.9) {
         currentMax = new_received * 1.2f;
         lv_chart_set_range(ui_ChartNetDown, LV_CHART_AXIS_PRIMARY_Y, 0, (lv_coord_t)currentMax);
@@ -134,7 +129,6 @@ void update_ui(const char * jsonString) {
         return;
     }
     
-    Serial.println("Updating UI...");
     update_processor(doc);
     update_graphics(doc);
     update_memory(doc);
@@ -155,18 +149,13 @@ void handle_serial_input() {
         // If we have at least one brace and they are now balanced
         if (braceCount == 0 && incomingBuffer.indexOf('{') != -1) {
             incomingBuffer.trim();
-            
-            // Debug: See the actual length to check for truncation
-            Serial.print("Full packet received. Length: "); 
-            Serial.println(incomingBuffer.length());
-
             update_ui(incomingBuffer.c_str());
             
             // Reset for next full object
             incomingBuffer = "";
         }
         
-        // Safety: If buffer gets insanely huge without a closing brace, reset
+        // Reset if buffer exceeded
         if (incomingBuffer.length() > 1024) {
             incomingBuffer = "";
             braceCount = 0;
@@ -185,12 +174,10 @@ void setup() {
     Serial.setRxBufferSize(1024);
     Serial.begin(9600);
     
-    // 1. Hardware Power Up
     pinMode(5, OUTPUT);
     digitalWrite(5, HIGH); 
     gfx->begin();
 
-    // 2. LVGL Core Start
     lv_init();
     lv_disp_draw_buf_init(&draw_buf, buf, NULL, screenWidth * 10);
     static lv_disp_drv_t disp_drv;
@@ -200,16 +187,7 @@ void setup() {
     disp_drv.flush_cb = my_disp_flush;
     disp_drv.draw_buf = &draw_buf;
     lv_disp_drv_register(&disp_drv);
-
-    // 3. START YOUR SQUARELINE UI
-    static bool initialized = false;
-    if (!initialized) {
-        ui_init();
-        initialized = true;
-        Serial.println("UI Initialized ONCE");
-    }
-    
-    Serial.println("SquareLine UI is Live!");
+    ui_init();
 }
 
 void loop() {

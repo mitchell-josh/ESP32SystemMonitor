@@ -13,9 +13,6 @@ builder.Services.AddSingleton<IHardwareProvider, WindowsHardwareProvider>();
 // Register settings to be accessible throughout the application.
 builder.Services.AddSingleton<ISettings, Settings>();
 
-// Secondary worker service for general tasks (i.e. Logging)
-builder.Services.AddHostedService<Worker>();
-
 // Registers the Machine model.
 // Manually injects the required IHardwareProvider and ISetting into the machine.
 builder.Services.AddSingleton<SysMonService.Models.Machine>(sp 

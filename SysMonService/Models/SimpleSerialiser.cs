@@ -3,7 +3,7 @@ using SysMonService.Interfaces;
 
 namespace SysMonService.Models;
 
-public class SimpleSerialiser<T> : ISerialisable<T>
+public abstract class SimpleSerialiser<T> : ISerialisable<T>
 {
     public string Serialise() => JsonSerializer.Serialize(this, this.GetType());
 

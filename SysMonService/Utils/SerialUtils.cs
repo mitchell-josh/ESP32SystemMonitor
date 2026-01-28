@@ -24,7 +24,7 @@ public static class SerialUtils
             }
             catch (Exception ex)
             {
-                global::System.Diagnostics.Debug.WriteLine(ex.StackTrace);
+                System.Diagnostics.Debug.WriteLine(ex.StackTrace);
             }
         }
     }

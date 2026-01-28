@@ -5,7 +5,7 @@ using SysMonService.Utils;
 
 namespace SysMonService.Models;
 
-public class System(IHardwareProvider hardwareProvider, ISettings settings) : SimpleSerialiser<System>
+public class Machine(IHardwareProvider hardwareProvider, ISettings settings) : SimpleSerialiser<Machine>
 {
     [JsonIgnore]
     public ISettings Settings => settings;

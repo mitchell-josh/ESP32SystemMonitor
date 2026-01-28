@@ -12,8 +12,8 @@ builder.Services.AddSingleton<ISettings, Settings>();
 
 builder.Services.AddHostedService<Worker>();
 
-builder.Services.AddSingleton<SysMonService.Models.System>(sp 
-    => new SysMonService.Models.System(
+builder.Services.AddSingleton<SysMonService.Models.Machine>(sp 
+    => new SysMonService.Models.Machine(
         sp.GetRequiredService<IHardwareProvider>(), 
         sp.GetRequiredService<ISettings>()));
 

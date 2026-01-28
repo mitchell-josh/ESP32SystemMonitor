@@ -26,6 +26,10 @@ public class Machine(IHardwareProvider hardwareProvider, ISettings settings) : S
         this.Network?.Refresh();
     }
 
+    /// <summary>
+    /// Triggers a fresh poll of the hardware sensors and serialises the data
+    /// for transmission.
+    /// </summary>
     public string RefreshAndSerialise()
     {
         this.Refresh();

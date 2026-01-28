@@ -21,14 +21,14 @@ public static class SerialUtils
     /// Note: This method implements an infinite loop. It is intended to be used in 
     /// background scenarios where the service must wait for hardware to be plugged in.
     /// </remarks>
-    public static SerialPort GetOpenSerialPort(
+    public static async Task<SerialPort> GetOpenSerialPort(
         string portName,
         int baudRate,
         Parity parity,
         int dataBits,
         StopBits stopBits)
     {
-        while (true)
+        return await Task.Run(() =>
         {
             // Initialise the port with the specified hardware parameters
             var serialPort = new SerialPort(portName, baudRate, parity, dataBits, stopBits);
@@ -51,10 +51,10 @@ public static class SerialUtils
 
                 // Dispose failed port object and release system resources.
                 serialPort?.Dispose();
-                
+
                 // small delay after disposing serial open attempt.
                 Thread.Sleep(50);
             }
-        }
+        });
     }
 }

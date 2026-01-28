@@ -18,6 +18,8 @@ public class SystemMonitorService(Models.Machine machine) : BackgroundService
     /// <param name="stoppingToken"></param>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        await Task.Yield();
+        
         SerialPort serialPort = null!;
         
         // Loop runs for entire lifetime of the service.
@@ -32,7 +34,7 @@ public class SystemMonitorService(Models.Machine machine) : BackgroundService
                     serialPort = null; // tidy up object
 
                     // Blocking call that waits for hardware to become available.
-                    serialPort = SerialUtils.GetOpenSerialPort(
+                    serialPort = await SerialUtils.GetOpenSerialPort(
                         machine.Settings.ComPort!,
                         9600,
                         Parity.None,

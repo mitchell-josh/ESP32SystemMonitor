@@ -22,31 +22,25 @@ jobs:
         with:
           dotnet-version: 9.0.x
 
-      - name: Restore and Build .NET
+      - name: Restore .NET
+        run: dotnet restore
+
+      - name: Publish .NET Service
         run: >
           dotnet publish -c Release -r win-x64 
           --self-contained true 
           -p:PublishSingleFile=true 
-          -p:IncludeNativeLibrariesForSelfExtract=true 
           -p:PublishTrimmed=false 
-          -p:ReadyToRun=true
+          -p:IncludeNativeLibrariesForSelfExtract=true 
           -p:DebugType=None 
           -o ./publish
-
-      - name: Publish .NET Service
-        # Added the flag to hide native DLLs inside the EXE
-        run: dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:PublishTrimmed=true -p:IncludeNativeLibrariesForSelfExtract=true -p:DebugType=None -o ./publish
-
-      - name: Zip Service
-        shell: powershell
-        run: Compress-Archive -Path ./publish/* -DestinationPath ./SysMonService.zip
-
-      - name: Set up Python & PlatformIO
+      
+      - name: Set up Python / PlatformIO
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: Install PlatformIO & Esptool
+      - name: Install PlatformIO / Esptool
         run: |
           python -m pip install --upgrade pip
           pip install --upgrade platformio esptool

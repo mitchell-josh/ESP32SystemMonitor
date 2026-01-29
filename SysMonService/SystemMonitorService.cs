@@ -20,7 +20,7 @@ public class SystemMonitorService(Models.Machine machine) : BackgroundService
     {
         await Task.Yield();
         
-        SerialPort serialPort = null!;
+        SerialPort? serialPort = null!;
         
         // Loop runs for entire lifetime of the service.
         while (!stoppingToken.IsCancellationRequested)
@@ -40,6 +40,12 @@ public class SystemMonitorService(Models.Machine machine) : BackgroundService
                         Parity.None,
                         8,
                         StopBits.One);
+
+                    serialPort.DataReceived += (s, a) =>
+                    {
+                        var received = serialPort.ReadExisting() ?? "";
+                        System.Diagnostics.Debug.WriteLine(received);
+                    };
                 }
                 
                 // Attempt to serialise and send data to microcontroller if connection is open.

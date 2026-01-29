@@ -1,0 +1,83 @@
+name: SysMonService
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  build:
+    permissions:
+        contents: write
+        
+    if: |
+      (github.event_name == 'push' && contains(github.event.head_commit.message, 'Version')) ||
+      (github.event_name == 'pull_request' && contains(github.event.pull_request.title, 'Version'))    
+    runs-on: windows-latest
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Restore .NET
+        run: dotnet restore
+
+      - name: Publish .NET Service
+        run: >
+          dotnet publish -c Release -r win-x64 
+          --self-contained true 
+          -p:PublishSingleFile=true 
+          -p:PublishTrimmed=false 
+          -p:IncludeNativeLibrariesForSelfExtract=true 
+          -p:DebugType=None 
+          -o ./publish
+      
+      - name: Set up Python / PlatformIO
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install PlatformIO / Esptool
+        run: |
+          python -m pip install --upgrade pip
+          pip install --upgrade platformio esptool
+          
+      - name: Build ESP32 Firmware
+        run: |
+          cd SysMonUI
+          pio run
+
+      - name: Upload All Artifacts to Github
+        shell: powershell
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TARGET_REPO: ${{ github.repository }}
+          COMMIT_MSG: ${{ github.event.head_commit.message }}          
+        run: |
+          # 1. Versioning Logic [cite: 6]
+          if ($env:COMMIT_MSG -match 'Version\s+([\d\.]+)') { $VERSION = $matches[1] } else { $VERSION = "0.0.0-manual" }
+          
+          # 2. Dynamic Discovery
+          $SERVICE_EXE = Get-ChildItem -Path "." -Filter "SysMonService.exe" -Recurse | Where-Object { $_.FullName -like "*publish*" } | Select-Object -First 1 -ExpandProperty FullName
+          $BOOTLOADER = Get-ChildItem -Path "." -Filter "bootloader.bin" -Recurse | Select-Object -First 1 -ExpandProperty FullName
+          $PARTITIONS = Get-ChildItem -Path "." -Filter "partitions.bin" -Recurse | Select-Object -First 1 -ExpandProperty FullName
+          $FIRMWARE = Get-ChildItem -Path "." -Filter "firmware.bin" -Recurse | Select-Object -First 1 -ExpandProperty FullName
+
+          # 3. Create Release and Upload Assets
+          # Note the use of ` for multi-line PowerShell commands
+          Write-Host "Creating Release $VERSION for $env:TARGET_REPO"
+          
+          gh release create "$VERSION" `
+            "$SERVICE_EXE" `
+            "$FIRMWARE" `
+            "$BOOTLOADER" `
+            "$PARTITIONS" `
+            --title "Release $VERSION" `
+            --notes "Automated build from commit: $env:COMMIT_MSG" `
+            --repo "$env:TARGET_REPO"

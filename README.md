@@ -15,11 +15,6 @@ Because the ESP32-S3 N16R8 uses 16MB Flash and OPI PSRAM, standard partition tab
 | partitions.bin | 0x8000 | Custom 16MB partition table |
 | firmware.bin | 0x10000 | The main application logic |
 
-Flash Tool Settings:
-- Flash Mode: OPI
-- Flash Speed: 80MHz
-- Flash Size: 128Mbit (16MB)
-
 ---
 
 ## 2. Service Configuration (appsettings.json)
@@ -34,7 +29,7 @@ The service will not start without this file. Create a file named appsettings.js
 }
 
 * ComPort: The COM port of your ESP32 (Check Device Manager).
-* PollingRate: Update frequency in milliseconds (default 1000).
+* PollingRate: Update frequency in milliseconds (default 2000).
 
 ---
 
@@ -52,10 +47,7 @@ New-Service -Name "SysMonService" `
             -DisplayName "ESP32 System Monitor" `
             -StartupType Automatic
 
-# 2. Set Recovery Options (Restarts service if USB is unplugged/replugged)
-sc.exe failure "SysMonService" reset= 0 actions= restart/60000
-
-# 3. Start the Service
+2 3. Start the Service
 Start-Service -Name "SysMonService"
 
 ---
@@ -86,3 +78,7 @@ If the ESP32 screen flashes or resets every time the service starts:
 - Check Status: Get-Service -Name "SysMonService"
 - Stop Service: Stop-Service -Name "SysMonService"
 - Remove Service: sc.exe delete "SysMonService"
+
+## 🛠️ Hardware & Case
+You can find the 3D printable case for this project here:
+[![Printables](https://media.printables.com/media/prints/61230ae5-ea7e-46a2-b0e0-0fed99b89bb7/images/11870798_6469ae21-9fa4-4fc7-bc44-fa27b2a7cd6c_3a876afc-fb1d-4a57-b5c8-06769f80e5d9/thumbs/inside/1920x1440/jpg/pxl_20260129_133507013mp.webp)](https://www.printables.com/model/1576094-esp32-system-monitor-case)

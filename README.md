@@ -22,9 +22,9 @@ Because the ESP32-S3 N16R8 uses 16MB Flash and OPI PSRAM, standard partition tab
 The service will not start without this file. Create a file named appsettings.json in the same folder as SysMonService.exe with the following structure:
 
 {
-  "MachineSettings": {
+  "Settings": {
     "ComPort": "COM3",
-    "PollingRate": 1000
+    "PollingRate": 2000
   }
 }
 
